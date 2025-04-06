@@ -1,0 +1,243 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The L∞mpoon Journal</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;700&family=Inter:wght@300;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-classic: #fefcf8;
+      --ink-classic: #1b1b1b;
+      --accent-classic: #6b4c9a;
+      --bg-modern: #f9f9f9;
+      --ink-modern: #1a1a1a;
+      --accent-modern: #1f6feb;
+      --font-serif: 'EB Garamond', serif;
+      --font-sans: 'Inter', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-serif);
+      background: var(--bg-classic);
+      color: var(--ink-classic);
+      transition: all 0.3s ease;
+    }
+
+    header {
+      background: var(--accent-classic);
+      color: white;
+      padding: 1rem 1.5rem 2rem;
+      text-align: center;
+      font-family: var(--font-sans);
+      position: relative;
+    }
+
+    header img.logo {
+      width: 70px;
+      height: auto;
+      margin-bottom: 1rem;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      margin: 0;
+      animation: typewriter 3s steps(40, end);
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 3px solid white;
+    }
+
+    @keyframes typewriter {
+      from { width: 0 }
+      to { width: 100% }
+    }
+
+    #toggle-theme {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 0.9rem;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid white;
+      color: white;
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+    }
+
+    main {
+      max-width: 850px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .article {
+      background: white;
+      border-left: 6px solid var(--accent-classic);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      transition: all 0.2s ease;
+    }
+
+    .article.error {
+      border-left-color: red;
+      background: #fff4f4;
+    }
+
+    .article pre {
+      white-space: pre-wrap;
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    .author-credit {
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .author-credit img {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 2px solid var(--accent-classic);
+    }
+
+    .author-credit span {
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+    }
+
+    .loading {
+      text-align: center;
+      font-style: italic;
+      color: var(--accent-classic);
+      margin: 2rem 0;
+    }
+
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      margin-left: 10px;
+      border: 2px solid var(--accent-classic);
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    body.modern {
+      background: var(--bg-modern);
+      color: var(--ink-modern);
+    }
+
+    body.modern header {
+      background: var(--accent-modern);
+    }
+
+    body.modern .article {
+      border-left-color: var(--accent-modern);
+    }
+
+    body.modern .author-credit img {
+      border-color: var(--accent-modern);
+    }
+
+    body.modern .loading {
+      color: var(--accent-modern);
+    }
+
+    body.modern .loading::after {
+      border-color: var(--accent-modern);
+      border-top-color: transparent;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="assets/logo/crest.jpg" alt="Crest" class="logo" />
+    <h1>The L∞mpoon Journal</h1>
+    <button id="toggle-theme">Modern</button>
+  </header>
+  <main id="article-container"></main>
+  <div class="loading" id="loading">Summoning satire...</div>
+
+  <script>
+    const authorImages = [
+      "Cerratodad.png", "Cerratomom.png", "CraigSuchin.webp", "ericlund.jpg",
+      "KirstenDinallHoyte.jpeg", "stevenmandis.jpg", "JonahLevy.jpeg",
+      "jamesfergus.png", "riversmom.png", "Hannah Frazers Dad.png",
+      "hillaryzaid.png", "navarro.png", "Maddiesmom.png"
+    ];
+
+    const container = document.getElementById('article-container');
+    const loading = document.getElementById('loading');
+    const toggleBtn = document.getElementById('toggle-theme');
+
+    function getRandomAuthorImg() {
+      const file = authorImages[Math.floor(Math.random() * authorImages.length)];
+      return "assets/authors/" + file;
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle("modern");
+      toggleBtn.textContent = document.body.classList.contains("modern") ? "Classic" : "Modern";
+    });
+
+    async function fetchArticle() {
+      try {
+        const res = await fetch("https://satirbackend.onrender.com/generate_article");
+        const data = await res.json();
+        console.log("Fetched article:", data);
+        return data.article || "[Error: No article returned]";
+      } catch (err) {
+        console.error("Fetch error:", err);
+        return "[Error: Unable to fetch article]";
+      }
+    }
+
+    async function loadMore() {
+      console.log("Starting article load...");
+      const article = await fetchArticle();
+      const div = document.createElement('div');
+      div.className = 'article';
+      const authorImg = getRandomAuthorImg();
+      div.innerHTML = `
+        <pre>${article}</pre>
+        <div class="author-credit">
+          <img src="${authorImg}" alt="author"/>
+          <span>Author</span>
+        </div>
+      `;
+      if (article.startsWith("[Error")) {
+        div.classList.add("error");
+      }
+      container.appendChild(div);
+    }
+
+    async function onScroll() {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+        loading.style.display = 'block';
+        await loadMore();
+        loading.style.display = 'none';
+      }
+    }
+
+    for (let i = 0; i < 3; i++) loadMore();
+    window.addEventListener('scroll', onScroll);
+  </script>
+</body>
+</html>
