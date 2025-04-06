@@ -72,7 +72,7 @@
     const loading = document.getElementById('loading');
 
     async function fetchArticle() {
-      const res = await fetch("http://localhost:5000/generate_article");
+      const res = await fetch("https://satirbackend.onrender.com");
       const data = await res.json();
       return data.article || "[Error loading article]";
     }
